@@ -173,7 +173,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     public void passwordReset(@RequestBody LoginDTO loginCredentials) throws UserNotFoundException {
 
         // Carico utente
-        Optional<User> optUser = userRepository.findByUsername(loginCredentials.getUsername());
+        Optional<User> optUser = userRepository.findByEmail(loginCredentials.getEmail());
 
         if (!optUser.isPresent()) {
             throw new UserNotFoundException();
