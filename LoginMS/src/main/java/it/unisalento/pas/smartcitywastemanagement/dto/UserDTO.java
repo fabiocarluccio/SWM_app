@@ -9,9 +9,11 @@ public class UserDTO {
     private String email;
     private Integer age;
 
-    String username;
-    String password;
-    String role;
+    private String username;
+    private String password;
+    private String role;
+
+    private String passwordResetToken;
 
     public String getUsername() {
         return username;
@@ -35,6 +37,14 @@ public class UserDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
     }
 
     public String getId() {

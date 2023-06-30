@@ -6,15 +6,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("user")
 public class User {
     @Id
-    String id;
-    String name;
-    String surname;
-    String email;
-    Integer age;
+    private String id;
+    private String name;
+    private String surname;
+    private String email;
+    private Integer age;
 
-    String username;
-    String password;
-    String role;
+    private String username;
+    private String password;
+    private String role;
+
+
+    private String passwordResetToken;
 
     public String getUsername() {
         return username;
@@ -38,6 +41,14 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
     }
 
     public String getId() {

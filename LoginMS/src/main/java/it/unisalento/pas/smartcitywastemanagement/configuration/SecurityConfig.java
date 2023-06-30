@@ -51,8 +51,10 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf().disable()
-                .authorizeRequests().requestMatchers("/api/users/authenticate").permitAll().
-                requestMatchers("/api/users/registration").permitAll().
+                .authorizeRequests().requestMatchers("/api/authentication/authenticate").permitAll().
+                requestMatchers("/api/authentication/password_change").permitAll().
+                requestMatchers("/api/authentication/password_reset").permitAll().
+                requestMatchers("/api/authentication/registration").permitAll().
                 anyRequest().authenticated().and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

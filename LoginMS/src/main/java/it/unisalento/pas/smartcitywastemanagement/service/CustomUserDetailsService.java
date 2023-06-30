@@ -1,12 +1,15 @@
 package it.unisalento.pas.smartcitywastemanagement.service;
 
 import it.unisalento.pas.smartcitywastemanagement.domain.User;
+import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundException;
 import it.unisalento.pas.smartcitywastemanagement.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service // va taggato come Service in modo che spring lo possa vedere all'avvio
 public class CustomUserDetailsService implements UserDetailsService {
@@ -16,11 +19,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        final User user = userRepository.findByUsername(username);
+        final Optional<User> optUser = userRepository.findByUsername(username);
 
-        if(user == null) {
+        if (!optUser.isPresent()) {
             throw new UsernameNotFoundException(username);
         }
+
+        final User user = optUser.get();
 
         // TODO - qua si implementa logica che assegna ruoli diversi a seconda del ruolo dell'utente
 

@@ -2,8 +2,11 @@ package it.unisalento.pas.smartcitywastemanagement.restcontrollers;
 
 import it.unisalento.pas.smartcitywastemanagement.domain.User;
 import it.unisalento.pas.smartcitywastemanagement.dto.AuthenticationResponseDTO;
+import it.unisalento.pas.smartcitywastemanagement.dto.PasswordResetDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.LoginDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.UserDTO;
+import it.unisalento.pas.smartcitywastemanagement.exceptions.PasswordNotMatchingException;
+import it.unisalento.pas.smartcitywastemanagement.exceptions.TokenNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundException;
 import it.unisalento.pas.smartcitywastemanagement.repositories.UserRepository;
 import it.unisalento.pas.smartcitywastemanagement.security.JwtUtilities;
@@ -25,7 +28,7 @@ import java.util.Optional;
 import static it.unisalento.pas.smartcitywastemanagement.configuration.SecurityConfig.passwordEncoder;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/authentication")
 public class UserRestController { // va a gestire tutto il ciclo CRUD degli utenti
     @Autowired
     UserRepository userRepository;
@@ -59,7 +62,84 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         return userDTO;
     }
 
-    @RequestMapping(value="/", method= RequestMethod.GET)
+    @RequestMapping(value="/password_change", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void passwordChange(@RequestBody PasswordResetDTO passwordResetDTO) throws PasswordNotMatchingException, TokenNotMatchingException, UserNotFoundException {
+        if (passwordResetDTO.getId() == null && passwordResetDTO.getUsername() == null) {
+            throw new UserNotFoundException();
+        }
+
+        User user = null;
+
+        if (passwordResetDTO.getId() != null) { // Change password using old Password
+
+            Optional<User> optUser = userRepository.findById(passwordResetDTO.getId());
+
+            if (!optUser.isPresent()) {
+                throw new UserNotFoundException();
+            }
+
+            user = optUser.get();
+
+            // TODO - UnauthorizedUserException se l'utente che manda la richiesta sta cercando di cambiare la password di un altro utente
+
+            // If old pwd doesn't correspond
+            if (!passwordEncoder().matches(passwordResetDTO.getOldPassword(), user.getPassword())) {
+                throw new PasswordNotMatchingException();
+            }
+
+        } else { // Change password using email Token
+            Optional<User> optUser = userRepository.findByUsername(passwordResetDTO.getUsername());
+
+            if (!optUser.isPresent()) {
+                throw new UserNotFoundException();
+            }
+
+            user = optUser.get();
+
+            // If email Token doesn't correspond
+            if (!passwordResetDTO.getEmailToken().equals(user.getPasswordResetToken())) {
+                throw new TokenNotMatchingException();
+            }
+
+        }
+
+        // Check new password requisites
+        // TODO .. controlli che la nuova password rispetti i requisiti
+
+        // Update password
+        user.setPasswordResetToken(null);
+        user.setPassword(passwordEncoder().encode(passwordResetDTO.getNewPassword()));
+        userRepository.save(user);
+    }
+
+
+    @RequestMapping(value="/password_reset", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void passwordReset(@RequestBody LoginDTO loginCredentials) throws UserNotFoundException {
+
+        // Carico utente
+        Optional<User> optUser = userRepository.findByUsername(loginCredentials.getUsername());
+
+        if (!optUser.isPresent()) {
+            throw new UserNotFoundException();
+        }
+
+        User user = optUser.get();
+
+        // Genero token per reset password
+        String token = "Token123";
+
+        // Aggiungo token in db (user) (quindi aggungere campo passwordResetToken sia in user che in userdao)
+        user.setPasswordResetToken(token);
+
+        userRepository.save(user);
+
+        // TODO - invio mail con token reset password
+        // ...
+
+    }
+
+
+        @RequestMapping(value="/", method= RequestMethod.GET)
     public List<UserDTO> getAll() {
         List<UserDTO> utenti = new ArrayList<>();
 
@@ -163,11 +243,13 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         // È buona norma prendersi tutti i dati dell'utente
         // ad esempio mi prendo il campo mail in modo che mando la mail una volta che lui ha eseguito l'accesso (o tentato di farlo)
         // per cui carichiamolo in memoria
-        User user = userRepository.findByUsername(authentication.getName()); // avremmo potuto prendere lo username anche da loginDTO invece da authentication, fa lo stesso visto che lo abbiamo caricato in authentication da loginDTO
+        Optional<User> optUser = userRepository.findByUsername(authentication.getName()); // avremmo potuto prendere lo username anche da loginDTO invece da authentication, fa lo stesso visto che lo abbiamo caricato in authentication da loginDTO
 
-        if(user == null) { // sto controllo lo ha messo "perche non si sa mai" (lezione 15, 1.20.00)
+        if (!optUser.isPresent()) { // sto controllo lo ha messo "perche non si sa mai" (lezione 15, 1.20.00)
             throw new UsernameNotFoundException(loginDTO.getUsername());
         }
+
+        User user = optUser.get();
 
         // Questo è un oggetto al cui sto dicendo che, da questo momento in poi, se sto richiamando la logica di business,
         // questo utente è autenticato.
