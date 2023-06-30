@@ -3,6 +3,7 @@ version: "3.8"
 services:
   #Servizio del database dell'intera applicazione
   database:
+    platform: linux/x86_64
     image: mongo:4.0
     container_name: mongodb
     ports:
@@ -16,7 +17,8 @@ services:
       - my-network
 
   login_service:
-    build: ./LoginMS
+    platform: linux/x86_64
+    image: openjdk:17-jdk-alpine
     container_name: LOGIN_Service
     ports:
       - 8080:8080

@@ -1,6 +1,5 @@
 package it.unisalento.pas.smartcitywastemanagement.restcontrollers;
 
-import io.jsonwebtoken.Jwt;
 import it.unisalento.pas.smartcitywastemanagement.domain.User;
 import it.unisalento.pas.smartcitywastemanagement.dto.AuthenticationResponseDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.LoginDTO;
@@ -37,6 +36,29 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     @Autowired
     private JwtUtilities jwtUtilities;
 
+    @RequestMapping(value="/registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public UserDTO registration(@RequestBody UserDTO userDTO) {
+
+        User newUser = new User();
+        newUser.setName(userDTO.getName());
+        newUser.setSurname(userDTO.getSurname());
+        newUser.setEmail(userDTO.getEmail());
+        newUser.setAge(userDTO.getAge());
+        newUser.setUsername(userDTO.getUsername());
+        newUser.setPassword(passwordEncoder().encode(userDTO.getPassword()));
+        newUser.setRole(userDTO.getRole());
+
+        // salvo utente nel db
+        newUser = userRepository.save(newUser);
+        System.out.println("L'ID DEL NUOVO UTENTE E'"+newUser.getId());
+
+        // restituisco l'utente aggiunto nel db curandomi del fatto di rimuovere la password (per sicurezza)
+        userDTO.setId(newUser.getId());
+        userDTO.setPassword(null);
+
+        return userDTO;
+    }
+
     @RequestMapping(value="/", method= RequestMethod.GET)
     public List<UserDTO> getAll() {
         List<UserDTO> utenti = new ArrayList<>();
@@ -44,10 +66,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         for(User user : userRepository.findAll()) {
             UserDTO userDTO = new UserDTO();
             userDTO.setId(user.getId());
-            userDTO.setNome(user.getNome());
-            userDTO.setCognome(user.getCognome());
+            userDTO.setName(user.getName());
+            userDTO.setSurname(user.getSurname());
             userDTO.setEmail(user.getEmail());
-            userDTO.setEta(user.getEta());
+            userDTO.setAge(user.getAge());
             userDTO.setUsername(user.getUsername());
 
             utenti.add(userDTO);
@@ -68,10 +90,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
             User user = optUser.get();
 
             UserDTO user1 = new UserDTO();
-            user1.setNome(user.getNome());
-            user1.setCognome(user.getCognome());
+            user1.setName(user.getName());
+            user1.setSurname(user.getSurname());
             user1.setEmail(user.getEmail());
-            user1.setEta(user.getEta());
+            user1.setAge(user.getAge());
             user1.setId(user.getId());
 
             return user1;
@@ -85,10 +107,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     public UserDTO post(@RequestBody UserDTO userDTO) {
 
         User newUser = new User();
-        newUser.setNome(userDTO.getNome());
-        newUser.setCognome(userDTO.getCognome());
+        newUser.setName(userDTO.getName());
+        newUser.setSurname(userDTO.getSurname());
         newUser.setEmail(userDTO.getEmail());
-        newUser.setEta(userDTO.getEta());
+        newUser.setAge(userDTO.getAge());
         newUser.setUsername(userDTO.getUsername());
         newUser.setPassword(passwordEncoder().encode(userDTO.getPassword()));
 
@@ -104,8 +126,8 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     }
 
     @RequestMapping(value="/find", method = RequestMethod.GET)
-    public List<UserDTO> findByCognome(@RequestParam String cognome) {
-        List<User> result = userRepository.findByCognome(cognome);  // Da un lato interrogo il db
+    public List<UserDTO> findBySurname(@RequestParam String surname) {
+        List<User> result = userRepository.findBySurname(surname);  // Da un lato interrogo il db
         List<UserDTO> utenti = new ArrayList<>();                   // Dall'altro mi creo la lista di risultati
                                                                     // (che devono essere necesariamente DTO).
 
@@ -113,10 +135,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         for(User user: result) {
             UserDTO userDTO = new UserDTO();
             userDTO.setId(user.getId());
-            userDTO.setNome(user.getNome());
-            userDTO.setCognome(user.getCognome());
+            userDTO.setName(user.getName());
+            userDTO.setSurname(user.getSurname());
             userDTO.setEmail(user.getEmail());
-            userDTO.setEta(user.getEta());
+            userDTO.setAge(user.getAge());
 
             utenti.add(userDTO);
         }

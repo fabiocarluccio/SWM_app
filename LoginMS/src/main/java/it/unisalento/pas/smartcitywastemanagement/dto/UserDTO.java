@@ -4,13 +4,14 @@ public class UserDTO {
 
     private String id;
 
-    private String nome;
-    private String cognome;
+    private String name;
+    private String surname;
     private String email;
-    private Integer eta;
+    private Integer age;
 
     String username;
     String password;
+    String role;
 
     public String getUsername() {
         return username;
@@ -28,6 +29,14 @@ public class UserDTO {
         this.password = password;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public String getId() {
         return id;
     }
@@ -36,20 +45,20 @@ public class UserDTO {
         this.id = id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCognome() {
-        return cognome;
+    public String getSurname() {
+        return surname;
     }
 
-    public void setCognome(String cognome) {
-        this.cognome = cognome;
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getEmail() {
@@ -60,12 +69,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public Integer getEta() {
-        return eta;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setEta(Integer eta) {
-        this.eta = eta;
+    public void setAge(Integer age) {
+        this.age = age;
     }
 }
 
