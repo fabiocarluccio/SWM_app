@@ -46,15 +46,12 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * @param userDTO
      * @return new User
      */
-    @PreAuthorize("hasRole('Admin')")
+    //@PreAuthorize("hasRole('Admin')")
     @RequestMapping(value="/registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public UserDTO registration(@RequestBody UserDTO userDTO) {
 
         User newUser = new User();
-        newUser.setName(userDTO.getName());
-        newUser.setSurname(userDTO.getSurname());
         newUser.setEmail(userDTO.getEmail());
-        newUser.setAge(userDTO.getAge());
         newUser.setUsername(userDTO.getUsername());
         newUser.setPassword(passwordEncoder().encode(userDTO.getPassword()));
         newUser.setRole(userDTO.getRole());
@@ -82,10 +79,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     public UserDTO citizenRegistration(@RequestBody UserDTO userDTO) {
 
         User newUser = new User();
-        newUser.setName(userDTO.getName());
-        newUser.setSurname(userDTO.getSurname());
         newUser.setEmail(userDTO.getEmail());
-        newUser.setAge(userDTO.getAge());
         newUser.setUsername(userDTO.getUsername());
         newUser.setPassword(passwordEncoder().encode(userDTO.getPassword()));
         newUser.setRole("Citizen");
@@ -104,53 +98,72 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     /**
      * Endpoint usato da qualsiasi User per aggiornare la password.
      * Contiene due differenti logiche, a seconda di come PasswordResetDTO è configurato.
-     * 1 - id non null          -->     Aggiornamento password usando come prova di autenticazione la vecchia password
-     * 2 - username non null    -->     Aggiornamento password usando come prova di autenticazione il Token via mail
+     * Aggiorna password usando come prova di autenticazione la vecchia password.
+     * TODO - Per chiamare questo metodo è necessario che l'utente sia loggato (ovvero che faccia la richiesta mediante token jwt)
      *
      * @param passwordResetDTO
      * @throws PasswordNotMatchingException
-     * @throws TokenNotMatchingException
      * @throws UserNotFoundException
      */
-    @RequestMapping(value="/password_change", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void passwordChange(@RequestBody PasswordResetDTO passwordResetDTO) throws PasswordNotMatchingException, TokenNotMatchingException, UserNotFoundException {
-        if (passwordResetDTO.getId() == null && passwordResetDTO.getUsername() == null) {
+    @RequestMapping(value="/password_update", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void passwordUpdate(@RequestBody PasswordResetDTO passwordResetDTO) throws PasswordNotMatchingException, UserNotFoundException {
+        if (passwordResetDTO.getId() == null) {
             throw new UserNotFoundException();
         }
 
         User user = null;
 
-        if (passwordResetDTO.getId() != null) { // Change password using old Password
+        Optional<User> optUser = userRepository.findById(passwordResetDTO.getId());
 
-            Optional<User> optUser = userRepository.findById(passwordResetDTO.getId());
+        if (!optUser.isPresent()) {
+            throw new UserNotFoundException();
+        }
 
-            if (!optUser.isPresent()) {
-                throw new UserNotFoundException();
-            }
+        user = optUser.get();
 
-            user = optUser.get();
+        // TODO - UnauthorizedUserException se l'utente che manda la richiesta sta cercando di cambiare la password di un altro utente
 
-            // TODO - UnauthorizedUserException se l'utente che manda la richiesta sta cercando di cambiare la password di un altro utente
+        // If old pwd doesn't correspond
+        if (!passwordEncoder().matches(passwordResetDTO.getOldPassword(), user.getPassword())) {
+            throw new PasswordNotMatchingException();
+        }
 
-            // If old pwd doesn't correspond
-            if (!passwordEncoder().matches(passwordResetDTO.getOldPassword(), user.getPassword())) {
-                throw new PasswordNotMatchingException();
-            }
+        // Check new password requisites
+        // TODO .. controlli che la nuova password rispetti i requisiti
 
-        } else { // Change password using email Token
-            Optional<User> optUser = userRepository.findByUsername(passwordResetDTO.getUsername());
+        // Update password
+        user.setPasswordResetToken(null);
+        user.setPassword(passwordEncoder().encode(passwordResetDTO.getNewPassword()));
+        userRepository.save(user);
+    }
 
-            if (!optUser.isPresent()) {
-                throw new UserNotFoundException();
-            }
+    /**
+     * Endpoint usato da qualsiasi User per aggiornare la password.
+     * Aggiorna password usando come prova di autenticazione il Token inviato via mail.
+     *
+     * @param passwordResetDTO
+     * @throws TokenNotMatchingException
+     * @throws UserNotFoundException
+     */
+    @RequestMapping(value="/password_reset", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void passwordReset(@RequestBody PasswordResetDTO passwordResetDTO) throws TokenNotMatchingException, UserNotFoundException {
+        if (passwordResetDTO.getUsername() == null) {
+            throw new UserNotFoundException();
+        }
 
-            user = optUser.get();
+        User user = null;
 
-            // If email Token doesn't correspond
-            if (!passwordResetDTO.getEmailToken().equals(user.getPasswordResetToken())) {
-                throw new TokenNotMatchingException();
-            }
+        Optional<User> optUser = userRepository.findByUsername(passwordResetDTO.getUsername());
 
+        if (!optUser.isPresent()) {
+            throw new UserNotFoundException();
+        }
+
+        user = optUser.get();
+
+        // If email Token doesn't correspond
+        if (!passwordResetDTO.getEmailToken().equals(user.getPasswordResetToken())) {
+            throw new TokenNotMatchingException();
         }
 
         // Check new password requisites
@@ -169,11 +182,11 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * @param loginCredentials
      * @throws UserNotFoundException
      */
-    @RequestMapping(value="/password_reset", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void passwordReset(@RequestBody LoginDTO loginCredentials) throws UserNotFoundException {
+    @RequestMapping(value="/password_reset_token", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void passwordResetToken(@RequestBody LoginDTO loginCredentials) throws UserNotFoundException {
 
         // Carico utente
-        Optional<User> optUser = userRepository.findByEmail(loginCredentials.getEmail());
+        Optional<User> optUser = userRepository.findByUsername(loginCredentials.getUsername());
 
         if (!optUser.isPresent()) {
             throw new UserNotFoundException();

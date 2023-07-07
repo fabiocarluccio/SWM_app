@@ -52,8 +52,9 @@ public class SecurityConfig {
 
         http.csrf().disable()
                 .authorizeRequests().requestMatchers("/api/authentication/authenticate").permitAll().
-                requestMatchers("/api/authentication/password_change").permitAll().
+                requestMatchers("/api/authentication/password_update").permitAll().
                 requestMatchers("/api/authentication/password_reset").permitAll().
+                requestMatchers("/api/authentication/password_reset_token").permitAll().
                 requestMatchers("/api/authentication/citizen_registration").permitAll().
                 requestMatchers("/api/authentication/registration").permitAll().
                 anyRequest().authenticated().and().sessionManagement()
