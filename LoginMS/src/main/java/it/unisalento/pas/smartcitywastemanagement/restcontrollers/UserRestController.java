@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import static it.unisalento.pas.smartcitywastemanagement.configuration.SecurityConfig.passwordEncoder;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/authentication")
 public class UserRestController { // va a gestire tutto il ciclo CRUD degli utenti
