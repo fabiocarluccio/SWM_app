@@ -75,7 +75,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * @param userDTO
      * @return new User
      */
-    @PreAuthorize("hasRole('MunicipalOffice')")
+    //@PreAuthorize("hasRole('MunicipalOffice')")
     @RequestMapping(value="/citizen_registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public UserDTO citizenRegistration(@RequestBody UserDTO userDTO) {
 
@@ -259,6 +259,24 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
     }
 
+
+    @RequestMapping(value="/getall", method= RequestMethod.GET)
+    public List<UserDTO> getAll() {
+        List<UserDTO> utenti = new ArrayList<>();
+
+        for(User user : userRepository.findAll()) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setUsername(user.getUsername());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setPassword(user.getPassword());
+            userDTO.setRole(user.getRole());
+
+            utenti.add(userDTO);
+        }
+
+        return utenti;
+    }
     /*
     @RequestMapping(value="/", method= RequestMethod.GET)
     public List<UserDTO> getAll() {
