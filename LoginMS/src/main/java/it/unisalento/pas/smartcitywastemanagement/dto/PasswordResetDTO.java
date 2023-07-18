@@ -3,9 +3,10 @@ package it.unisalento.pas.smartcitywastemanagement.dto;
 public class PasswordResetDTO {
     private String id;
     private String username;
+    private String email;
 
     private String oldPassword;
-    private String emailToken;
+    private String passwordResetToken;
 
     private String newPassword;
 
@@ -25,6 +26,14 @@ public class PasswordResetDTO {
         this.username = username;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getOldPassword() {
         return oldPassword;
     }
@@ -33,12 +42,12 @@ public class PasswordResetDTO {
         this.oldPassword = oldPassword;
     }
 
-    public String getEmailToken() {
-        return emailToken;
+    public String getPasswordResetToken() {
+        return passwordResetToken;
     }
 
-    public void setEmailToken(String emailToken) {
-        this.emailToken = emailToken;
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
     }
 
     public String getNewPassword() {

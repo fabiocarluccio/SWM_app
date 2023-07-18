@@ -4,7 +4,6 @@ import it.unisalento.pas.smartcitywastemanagement.domain.User;
 import it.unisalento.pas.smartcitywastemanagement.dto.AuthenticationResponseDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.PasswordResetDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.LoginDTO;
-import it.unisalento.pas.smartcitywastemanagement.dto.UserDTO;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.PasswordNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.TokenNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundException;
@@ -13,7 +12,6 @@ import it.unisalento.pas.smartcitywastemanagement.security.JwtUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -44,45 +42,45 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * Endpoint usato dall'Admin per registrare nuovi User.
      * Gli User possono avere uno di 4 ruoli: Citizen, MunicipalOffice, SmartBinWasteManagement, Admin.
      *
-     * @param userDTO
+     * @param loginDTO
      * @return new User
      */
     //@PreAuthorize("hasRole('Admin')")
     @RequestMapping(value="/registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public UserDTO registration(@RequestBody UserDTO userDTO) {
+    public LoginDTO registration(@RequestBody LoginDTO loginDTO) {
 
         User newUser = new User();
-        newUser.setEmail(userDTO.getEmail());
-        newUser.setUsername(userDTO.getUsername());
-        newUser.setPassword(passwordEncoder().encode(userDTO.getPassword()));
-        newUser.setRole(userDTO.getRole());
+        newUser.setEmail(loginDTO.getEmail());
+        newUser.setUsername(loginDTO.getUsername());
+        newUser.setPassword(passwordEncoder().encode(loginDTO.getPassword()));
+        newUser.setRole(loginDTO.getRole());
 
         // salvo utente nel db
         newUser = userRepository.save(newUser);
         System.out.println("L'ID DEL NUOVO UTENTE E'"+newUser.getId());
 
         // restituisco l'utente aggiunto nel db curandomi del fatto di rimuovere la password (per sicurezza)
-        userDTO.setId(newUser.getId());
-        userDTO.setPassword(null);
+        loginDTO.setId(newUser.getId());
+        loginDTO.setPassword(null);
 
-        return userDTO;
+        return loginDTO;
     }
 
     /**
      * Endpoint usato dall'Ufficio Comunale per registrare nuovi User con ruolo di "Cittadino".
      * Non è possibile inserire User aventi altri ruoli.
      *
-     * @param userDTO
+     * @param loginDTO
      * @return new User
      */
     //@PreAuthorize("hasRole('MunicipalOffice')")
     @RequestMapping(value="/citizen_registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public UserDTO citizenRegistration(@RequestBody UserDTO userDTO) {
+    public LoginDTO citizenRegistration(@RequestBody LoginDTO loginDTO) {
 
         User newUser = new User();
-        newUser.setEmail(userDTO.getEmail());
-        newUser.setUsername(userDTO.getUsername());
-        newUser.setPassword(passwordEncoder().encode(userDTO.getPassword()));
+        newUser.setEmail(loginDTO.getEmail());
+        newUser.setUsername(loginDTO.getUsername());
+        newUser.setPassword(passwordEncoder().encode(loginDTO.getPassword()));
         newUser.setRole("Citizen");
 
         // salvo utente nel db
@@ -90,10 +88,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         System.out.println("L'ID DEL NUOVO UTENTE E'"+newUser.getId());
 
         // restituisco l'utente aggiunto nel db curandomi del fatto di rimuovere la password (per sicurezza)
-        userDTO.setId(newUser.getId());
-        userDTO.setPassword(null);
+        loginDTO.setId(newUser.getId());
+        loginDTO.setPassword(null);
 
-        return userDTO;
+        return loginDTO;
     }
 
     /**
@@ -163,7 +161,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         user = optUser.get();
 
         // If email Token doesn't correspond
-        if (!passwordResetDTO.getEmailToken().equals(user.getPasswordResetToken())) {
+        if (!passwordResetDTO.getPasswordResetToken().equals(user.getPasswordResetToken())) {
             throw new TokenNotMatchingException();
         }
 
@@ -261,11 +259,11 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
 
     @RequestMapping(value="/getall", method= RequestMethod.GET)
-    public List<UserDTO> getAll() {
-        List<UserDTO> utenti = new ArrayList<>();
+    public List<LoginDTO> getAll() {
+        List<LoginDTO> utenti = new ArrayList<>();
 
         for(User user : userRepository.findAll()) {
-            UserDTO userDTO = new UserDTO();
+            LoginDTO userDTO = new LoginDTO();
             userDTO.setId(user.getId());
             userDTO.setUsername(user.getUsername());
             userDTO.setEmail(user.getEmail());
