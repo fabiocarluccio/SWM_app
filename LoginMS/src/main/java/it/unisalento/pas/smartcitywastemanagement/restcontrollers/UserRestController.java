@@ -257,6 +257,26 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     }
 
 
+    //@PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value="/get_info/{username}", method=RequestMethod.GET)
+    public LoginDTO get(@PathVariable String username) throws UserNotFoundException {
+        System.out.println("Username: " + username);
+
+        Optional<User> optUser = userRepository.findByUsername(username);
+
+        if (optUser.isPresent()) {
+            User user = optUser.get();
+
+            LoginDTO loginDTO = new LoginDTO();
+            loginDTO.setUsername(user.getUsername());
+            loginDTO.setEmail(user.getEmail());
+            loginDTO.setRole(user.getRole());
+
+            return loginDTO;
+        }
+        throw new UserNotFoundException();
+    }
+
     @RequestMapping(value="/getall", method= RequestMethod.GET)
     public List<LoginDTO> getAll() {
         List<LoginDTO> utenti = new ArrayList<>();
