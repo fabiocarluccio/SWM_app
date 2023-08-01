@@ -232,7 +232,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         Optional<User> optUser = userRepository.findByUsername(authentication.getName()); // avremmo potuto prendere lo username anche da loginDTO invece da authentication, fa lo stesso visto che lo abbiamo caricato in authentication da loginDTO
 
         if (!optUser.isPresent()) { // sto controllo lo ha messo "perche non si sa mai" (lezione 15, 1.20.00)
-            throw new UsernameNotFoundException(loginDTO.getUsername());
+            throw new UsernameNotFoundException("L'account " + loginDTO.getUsername() + "non è esistente.");
         }
 
         User user = optUser.get();
@@ -254,7 +254,6 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
         // rispondo alla chiamata api con il token jwt generato
         return ResponseEntity.ok(new AuthenticationResponseDTO(jwt));
-
     }
 
 
