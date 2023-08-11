@@ -51,7 +51,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.cors().and().csrf().disable()
-                .authorizeRequests().requestMatchers("/api/authentication/get_info").permitAll().
+                .authorizeRequests().requestMatchers("/api/authentication/get_info/*").permitAll().
                 requestMatchers("/api/authentication/getall").permitAll().
                 requestMatchers("/api/authentication/authenticate").permitAll().
                 requestMatchers("/api/authentication/password_update").permitAll().
