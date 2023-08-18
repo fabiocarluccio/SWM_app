@@ -1,12 +1,15 @@
 package it.unisalento.pas.smartcitywastemanagement.restcontrollers;
 
+import it.unisalento.pas.smartcitywastemanagement.domain.CitizenToken;
 import it.unisalento.pas.smartcitywastemanagement.domain.User;
 import it.unisalento.pas.smartcitywastemanagement.dto.AuthenticationResponseDTO;
+import it.unisalento.pas.smartcitywastemanagement.dto.CitizenTokenDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.PasswordResetDTO;
 import it.unisalento.pas.smartcitywastemanagement.dto.LoginDTO;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.PasswordNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.TokenNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundException;
+import it.unisalento.pas.smartcitywastemanagement.repositories.CitizenTokenRepository;
 import it.unisalento.pas.smartcitywastemanagement.repositories.UserRepository;
 import it.unisalento.pas.smartcitywastemanagement.security.JwtUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,9 @@ import static it.unisalento.pas.smartcitywastemanagement.configuration.SecurityC
 public class UserRestController { // va a gestire tutto il ciclo CRUD degli utenti
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    CitizenTokenRepository citizenTokenRepository;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -69,13 +75,15 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     /**
      * Endpoint usato dall'Ufficio Comunale per registrare nuovi User con ruolo di "Cittadino".
      * Non è possibile inserire User aventi altri ruoli.
+     * Viene aggiunto anche il token del cittadino nel database.
      *
      * @param loginDTO
+     * @param citizenId
      * @return new User
      */
     //@PreAuthorize("hasRole('MunicipalOffice')")
-    @RequestMapping(value="/citizen_registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public LoginDTO citizenRegistration(@RequestBody LoginDTO loginDTO) {
+    @RequestMapping(value="/citizen_registration/{citizenId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public LoginDTO citizenRegistration(@RequestBody LoginDTO loginDTO, @PathVariable String citizenId) {
 
         User newUser = new User();
         newUser.setEmail(loginDTO.getEmail());
@@ -83,13 +91,21 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         newUser.setPassword(passwordEncoder().encode(loginDTO.getPassword()));
         newUser.setRole("Citizen");
 
+        CitizenToken newCitizenToken = new CitizenToken();
+        newCitizenToken.setCitizenId(citizenId);
+
         // salvo utente nel db
         newUser = userRepository.save(newUser);
         System.out.println("L'ID DEL NUOVO UTENTE E'"+newUser.getId());
 
+        // salvo token nel db
+        newCitizenToken = citizenTokenRepository.save(newCitizenToken);
+        System.out.println("IL TOKEN DEL NUOVO CITTADINO E'"+newCitizenToken.getToken());
+
         // restituisco l'utente aggiunto nel db curandomi del fatto di rimuovere la password (per sicurezza)
         loginDTO.setId(newUser.getId());
         loginDTO.setPassword(null);
+        loginDTO.setRole("Citizen");
 
         return loginDTO;
     }
@@ -294,6 +310,33 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
         return utenti;
     }
+
+    /**
+     * Endpoint usato per ricavare l'id del cittadino, dato il token.
+     * Utilizzato per autorizzare i conferimenti.
+     *
+     * @param citizen_token
+     * @return
+     * @throws UserNotFoundException
+     */
+    @RequestMapping(value="/get_citizen_id/{citizen_token}", method=RequestMethod.GET)
+    public CitizenTokenDTO getCitizenId(@PathVariable String citizen_token) throws UserNotFoundException {
+        System.out.println("CitizenToken: " + citizen_token);
+
+        Optional<CitizenToken> optCitizenToken = citizenTokenRepository.findByToken(citizen_token);
+
+        if (optCitizenToken.isPresent()) {
+            CitizenToken citizenToken = optCitizenToken.get();
+
+            CitizenTokenDTO citizenTokenDTO = new CitizenTokenDTO();
+            citizenTokenDTO.setToken(citizenToken.getToken());
+            citizenTokenDTO.setCitizenId(citizenToken.getCitizenId());
+
+            return citizenTokenDTO;
+        }
+        throw new UserNotFoundException();
+    }
+
     /*
     @RequestMapping(value="/", method= RequestMethod.GET)
     public List<UserDTO> getAll() {
