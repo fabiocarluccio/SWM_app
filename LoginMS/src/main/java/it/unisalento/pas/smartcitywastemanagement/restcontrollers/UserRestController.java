@@ -2,10 +2,7 @@ package it.unisalento.pas.smartcitywastemanagement.restcontrollers;
 
 import it.unisalento.pas.smartcitywastemanagement.domain.CitizenToken;
 import it.unisalento.pas.smartcitywastemanagement.domain.User;
-import it.unisalento.pas.smartcitywastemanagement.dto.AuthenticationResponseDTO;
-import it.unisalento.pas.smartcitywastemanagement.dto.CitizenTokenDTO;
-import it.unisalento.pas.smartcitywastemanagement.dto.PasswordResetDTO;
-import it.unisalento.pas.smartcitywastemanagement.dto.LoginDTO;
+import it.unisalento.pas.smartcitywastemanagement.dto.*;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.PasswordNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.TokenNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundException;
@@ -20,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
     /**
      * Endpoint usato dall'Admin per registrare nuovi User.
-     * Gli User possono avere uno di 4 ruoli: Citizen, MunicipalOffice, SmartBinWasteManagement, Admin.
+     * Gli User possono avere uno di 4 ruoli: Citizen, MunicipalOffice, WasteManagementCompany, Admin.
      *
      * @param loginDTO
      * @return new User
@@ -77,22 +76,23 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * Non è possibile inserire User aventi altri ruoli.
      * Viene aggiunto anche il token del cittadino nel database.
      *
-     * @param loginDTO
-     * @param citizenId
+     * @param citizenRegistrationDTO
      * @return new User
      */
     //@PreAuthorize("hasRole('MunicipalOffice')")
-    @RequestMapping(value="/citizen_registration/{citizenId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public LoginDTO citizenRegistration(@RequestBody LoginDTO loginDTO, @PathVariable String citizenId) {
+    @RequestMapping(value="/citizen_registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String citizenRegistration(@RequestBody CitizenRegistrationDTO citizenRegistrationDTO) {
 
         User newUser = new User();
-        newUser.setEmail(loginDTO.getEmail());
-        newUser.setUsername(loginDTO.getUsername());
-        newUser.setPassword(passwordEncoder().encode(loginDTO.getPassword()));
+        newUser.setEmail(citizenRegistrationDTO.getEmail());
+        newUser.setUsername(citizenRegistrationDTO.getEmail());
+        String password = User.generatePassword();
+        System.out.println("Password: " + password);
+        newUser.setPassword(passwordEncoder().encode(password));
         newUser.setRole("Citizen");
 
         CitizenToken newCitizenToken = new CitizenToken();
-        newCitizenToken.setCitizenId(citizenId);
+        newCitizenToken.setCitizenId(citizenRegistrationDTO.getCitizenId());
 
         // salvo utente nel db
         newUser = userRepository.save(newUser);
@@ -102,12 +102,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         newCitizenToken = citizenTokenRepository.save(newCitizenToken);
         System.out.println("IL TOKEN DEL NUOVO CITTADINO E'"+newCitizenToken.getToken());
 
-        // restituisco l'utente aggiunto nel db curandomi del fatto di rimuovere la password (per sicurezza)
-        loginDTO.setId(newUser.getId());
-        loginDTO.setPassword(null);
-        loginDTO.setRole("Citizen");
+        //TODO - eventuale invio tramite mail di username (e password eventualmente, dato che la si può reimpostare)
 
-        return loginDTO;
+        // restituisco id user creato
+        return newUser.getId();
     }
 
     /**
@@ -154,7 +152,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
     /**
      * Endpoint usato da qualsiasi User per aggiornare la password.
-     * Aggiorna password usando come prova di autenticazione il Token inviato via mail.
+     * Aggiorna password usando come prova di autenticazione il Token ricevuto via mail.
      *
      * @param passwordResetDTO
      * @throws TokenNotMatchingException
@@ -170,14 +168,15 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
         Optional<User> optUser = userRepository.findByUsername(passwordResetDTO.getUsername());
 
-        if (!optUser.isPresent()) {
+        if (optUser.isEmpty()) {
             throw new UserNotFoundException();
         }
 
         user = optUser.get();
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         // If email Token doesn't correspond
-        if (!passwordResetDTO.getPasswordResetToken().equals(user.getPasswordResetToken())) {
+        if (!passwordEncoder.matches(passwordResetDTO.getPasswordResetToken(), user.getPasswordResetToken())) {
             throw new TokenNotMatchingException();
         }
 
@@ -194,7 +193,6 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * Endpoint usato da qualsiasi user per reimpostare la password.
      * Invia mail contenente il Token che permette di reimpostare la password.
      *
-     * @param loginCredentials
      * @throws UserNotFoundException
      */
     @RequestMapping(value="/password_reset_token", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -203,22 +201,22 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         // Carico utente
         Optional<User> optUser = userRepository.findByUsername(loginCredentials.getUsername());
 
-        if (!optUser.isPresent()) {
+        if (optUser.isEmpty()) {
             throw new UserNotFoundException();
         }
 
         User user = optUser.get();
 
         // Genero token per reset password
-        String token = "Token123";
+        String token = User.generatePasswordResetToken();
 
-        // Aggiungo token in db (user) (quindi aggungere campo passwordResetToken sia in user che in userdao)
-        user.setPasswordResetToken(token);
-
+        // Aggiungo token in db (user)
+        user.setPasswordResetToken(passwordEncoder().encode(token));
         userRepository.save(user);
 
         // TODO - invio mail con token reset password
         // ...
+        System.out.println("Token reset password: " + token);
 
     }
 

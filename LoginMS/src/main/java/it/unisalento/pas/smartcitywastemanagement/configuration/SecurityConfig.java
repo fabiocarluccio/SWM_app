@@ -58,7 +58,7 @@ public class SecurityConfig {
                 requestMatchers("/api/authentication/password_update").permitAll().
                 requestMatchers("/api/authentication/password_reset").permitAll().
                 requestMatchers("/api/authentication/password_reset_token").permitAll().
-                requestMatchers("/api/authentication/citizen_registration/*").permitAll().
+                requestMatchers("/api/authentication/citizen_registration").permitAll().
                 requestMatchers("/api/authentication/registration").permitAll().
                 anyRequest().authenticated().and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

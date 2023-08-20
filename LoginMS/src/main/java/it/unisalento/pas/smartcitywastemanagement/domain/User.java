@@ -1,6 +1,7 @@
 package it.unisalento.pas.smartcitywastemanagement.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("user")
@@ -8,13 +9,40 @@ public class User {
     @Id
     private String id;
 
+    @Indexed(unique=true)
     private String username;
+    @Indexed(unique=true)
     private String email;
     private String password;
     private String role;
 
 
     private String passwordResetToken;
+
+    static public String generatePassword() {
+        int length = 12; // Lunghezza della stringa desiderata
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder randomString = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int randomIndex = (int) (Math.random() * characters.length());
+            char randomChar = characters.charAt(randomIndex);
+            randomString.append(randomChar);
+        }
+        return randomString.toString();
+    }
+    static public String generatePasswordResetToken() {
+        int length = 6; // Lunghezza della stringa desiderata
+        String characters = "0123456789";
+        StringBuilder randomString = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int randomIndex = (int) (Math.random() * characters.length());
+            char randomChar = characters.charAt(randomIndex);
+            randomString.append(randomChar);
+        }
+        return randomString.toString();
+    }
 
     public String getUsername() {
         return username;
