@@ -9,9 +9,11 @@ import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundExcepti
 import it.unisalento.pas.smartcitywastemanagement.repositories.CitizenTokenRepository;
 import it.unisalento.pas.smartcitywastemanagement.repositories.UserRepository;
 import it.unisalento.pas.smartcitywastemanagement.security.JwtUtilities;
+import it.unisalento.pas.smartcitywastemanagement.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,6 +44,10 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
 
     @Autowired
     private JwtUtilities jwtUtilities;
+
+
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Endpoint usato dall'Admin per registrare nuovi User.
@@ -81,7 +87,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      */
     //@PreAuthorize("hasRole('MunicipalOffice')")
     @RequestMapping(value="/citizen_registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String citizenRegistration(@RequestBody CitizenRegistrationDTO citizenRegistrationDTO) {
+    public String citizenRegistration(@RequestBody CitizenRegistrationDTO citizenRegistrationDTO) throws MailException {
 
         User newUser = new User();
         newUser.setEmail(citizenRegistrationDTO.getEmail());
@@ -102,7 +108,8 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         newCitizenToken = citizenTokenRepository.save(newCitizenToken);
         System.out.println("IL TOKEN DEL NUOVO CITTADINO E'"+newCitizenToken.getToken());
 
-        //TODO - eventuale invio tramite mail di username (e password eventualmente, dato che la si può reimpostare)
+        // invio le credenziali tramite email
+        emailService.sendCredentialsEmail(newUser.getEmail(),newUser.getUsername(), password);
 
         // restituisco id user creato
         return newUser.getId();
