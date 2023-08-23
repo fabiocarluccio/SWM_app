@@ -3,6 +3,7 @@ package it.unisalento.pas.smartcitywastemanagement.exceptions;
 import it.unisalento.pas.smartcitywastemanagement.dto.ExceptionDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -83,6 +84,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                         0,
                         Exception.class.getSimpleName(),
                         "Internal server error"
+                ));
+    }
+
+    @ExceptionHandler(MailException.class)
+    public ResponseEntity<Object> handleGenericException(MailException ex) {
+        // Creare un oggetto di risposta personalizzato per tutte le altre eccezioni
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ExceptionDTO(
+                        6,
+                        MailException.class.getSimpleName(),
+                        "Error during email sending"
                 ));
     }
 }
