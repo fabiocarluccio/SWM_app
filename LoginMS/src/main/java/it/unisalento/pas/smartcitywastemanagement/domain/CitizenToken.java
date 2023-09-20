@@ -1,6 +1,7 @@
 package it.unisalento.pas.smartcitywastemanagement.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("citizenToken")
 public class CitizenToken {
