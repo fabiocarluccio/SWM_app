@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static it.unisalento.pas.smartcitywastemanagement.security.SecurityConstants.JWT_SECRET;
+import static it.unisalento.pas.smartcitywastemanagement.security.SecurityConstants.*;
 
 
 @Service
@@ -37,14 +37,17 @@ public class JwtUtilities {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role",role);
+        claims.put("aud",AUDIENCE);
         return createToken(claims, username);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
 
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+                .setIssuer(ISSUER)
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(SignatureAlgorithm.HS256, JWT_SECRET).compact();
     }

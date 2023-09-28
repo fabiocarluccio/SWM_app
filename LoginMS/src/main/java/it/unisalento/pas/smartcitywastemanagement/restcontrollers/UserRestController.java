@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -271,7 +272,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         // ... eventuale logica di business
 
         // genero token jwt
-        final String jwt = jwtUtilities.generateToken(user.getUsername());
+        final String jwt = jwtUtilities.generateToken(user.getUsername(), user.getRole());
 
         // rispondo alla chiamata api con il token jwt generato
         return ResponseEntity.ok(new AuthenticationResponseDTO(jwt));
@@ -298,6 +299,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         throw new UserNotFoundException();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(value="/getall", method= RequestMethod.GET)
     public List<LoginDTO> getAll() {
         List<LoginDTO> utenti = new ArrayList<>();
