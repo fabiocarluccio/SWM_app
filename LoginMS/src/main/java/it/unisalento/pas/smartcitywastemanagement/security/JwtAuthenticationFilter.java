@@ -1,21 +1,25 @@
 package it.unisalento.pas.smartcitywastemanagement.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import it.unisalento.pas.smartcitywastemanagement.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+
+import static it.unisalento.pas.smartcitywastemanagement.security.SecurityConstants.JWT_SECRET;
+import static it.unisalento.pas.smartcitywastemanagement.security.SecurityConstants.THIS_MICROSERVICE;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -45,21 +49,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // una volta che ho lo username, io me lo carico,
-            UserDetails userDetails = this.customerUserDetailsService.loadUserByUsername(username);
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(JWT_SECRET)
+                    .build()
+                    .parseClaimsJws(jwt)
+                    .getBody();
 
-            // faccio la validazione per vedere se questo token è valido
-            if (jwtUtilities.validateToken(jwt, userDetails)) {
 
-                // e poi mi faccio tutta la parte di autenticazione
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            List<String> audience = claims.get("aud", List.class);
+            String role =null;
+            if (audience != null && audience.contains(THIS_MICROSERVICE)) {
+                role = claims.get("role", String.class);
+                System.out.println(role);
+                UserDetails userDetails = null;
+
+                if(role.equals("MICROSERVICE-COMMUNICATION")) {
+                    userDetails = User.builder()
+                            .username(username)
+                            .password("")
+                            .roles(role)
+                            .build();
+                }else {
+                    userDetails = this.customerUserDetailsService.loadUserByUsername(username);
+                }
+
+                System.out.println(username);
+
+
+                // faccio la validazione per vedere se questo token è valido
+                if (jwtUtilities.validateToken(jwt, userDetails)) {
+
+                    // e poi mi faccio tutta la parte di autenticazione
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    usernamePasswordAuthenticationToken
+                            .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
             }
-        }
+
+            }
         chain.doFilter(request, response);
+
     }
 
 }

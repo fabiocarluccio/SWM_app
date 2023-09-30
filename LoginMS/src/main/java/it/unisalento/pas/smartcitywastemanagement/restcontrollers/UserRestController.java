@@ -87,6 +87,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * @return new User
      */
     //@PreAuthorize("hasRole('MunicipalOffice')")
+    @PreAuthorize("hasRole('MICROSERVICE-COMMUNICATION')")
     @RequestMapping(value="/citizen_registration", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public String citizenRegistration(@RequestBody CitizenRegistrationDTO citizenRegistrationDTO) throws MailException {
 

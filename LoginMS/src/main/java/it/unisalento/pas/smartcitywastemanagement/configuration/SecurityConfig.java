@@ -1,24 +1,19 @@
 package it.unisalento.pas.smartcitywastemanagement.configuration;
 
+import it.unisalento.pas.smartcitywastemanagement.security.JwtAuthenticationEntryPoint;
 import it.unisalento.pas.smartcitywastemanagement.security.JwtAuthenticationFilter;
 import it.unisalento.pas.smartcitywastemanagement.service.CustomUserDetailsService;
-import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,6 +23,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -51,17 +49,18 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.cors().and().csrf().disable()
-                .authorizeRequests().requestMatchers("/api/authentication/get_citizen_id/*").permitAll().
+                .authorizeRequests().
                 requestMatchers("/api/authentication/get_info/*").permitAll().
                 requestMatchers("/api/authentication/getall").permitAll().
                 requestMatchers("/api/authentication/authenticate").permitAll().
                 requestMatchers("/api/authentication/password_update").permitAll().
                 requestMatchers("/api/authentication/password_reset").permitAll().
                 requestMatchers("/api/authentication/password_reset_token").permitAll().
-                requestMatchers("/api/authentication/citizen_registration").permitAll().
                 requestMatchers("/api/authentication/registration").permitAll().
-                anyRequest().authenticated().and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                anyRequest().authenticated().
+                and().
+                exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)).
+                sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
         /*
