@@ -27,7 +27,7 @@ public class EmailService {
         // Setting del messaggio da inviare
         String text = String.format(templateCredentialsMessage.getText(), username, password);
         message.setText(text);
-        message.setTo(recipient);
+        message.setTo("carmine.accogli01@gmail.com"); // qua va recipient
 
         // Invio della mail
         mailSender.send(message);
