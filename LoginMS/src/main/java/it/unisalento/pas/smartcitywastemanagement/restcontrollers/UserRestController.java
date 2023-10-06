@@ -12,6 +12,8 @@ import it.unisalento.pas.smartcitywastemanagement.repositories.UserRepository;
 import it.unisalento.pas.smartcitywastemanagement.security.JwtUtilities;
 import it.unisalento.pas.smartcitywastemanagement.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -303,13 +305,16 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
     }
 
     @RequestMapping(value="/getCitizenToken/{citizenID}")
-    public ResponseEntity<String> getCitizenToken(@PathVariable("citizenID") String citizenID) throws CitizenNotFoundException {
+    public ResponseEntity<ResponseDTO> getCitizenToken(@PathVariable("citizenID") String citizenID) throws CitizenNotFoundException {
 
         Optional<CitizenToken> citizenToken = citizenTokenRepository.findByCitizenId(citizenID);
         if(!citizenToken.isPresent())
             throw new CitizenNotFoundException();
 
-        return ResponseEntity.ok(citizenToken.get().getToken());
+        return new ResponseEntity<>(
+                new ResponseDTO("success",citizenToken.get().getToken()),
+                HttpStatus.OK
+        );
 
     }
 
