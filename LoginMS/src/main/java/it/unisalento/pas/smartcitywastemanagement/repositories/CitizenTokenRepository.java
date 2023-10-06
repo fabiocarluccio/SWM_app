@@ -10,6 +10,6 @@ public interface CitizenTokenRepository extends MongoRepository<CitizenToken, St
 
     public Optional<CitizenToken> findByToken(String token);
 
-    public Optional<CitizenToken> findByCitizenId(String citizenId);
+    Optional<CitizenToken> findByCitizenId(String citizenId);
 
 }

@@ -3,6 +3,7 @@ package it.unisalento.pas.smartcitywastemanagement.restcontrollers;
 import it.unisalento.pas.smartcitywastemanagement.domain.CitizenToken;
 import it.unisalento.pas.smartcitywastemanagement.domain.User;
 import it.unisalento.pas.smartcitywastemanagement.dto.*;
+import it.unisalento.pas.smartcitywastemanagement.exceptions.CitizenNotFoundException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.PasswordNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.TokenNotMatchingException;
 import it.unisalento.pas.smartcitywastemanagement.exceptions.UserNotFoundException;
@@ -294,10 +295,22 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
             loginDTO.setUsername(user.getUsername());
             loginDTO.setEmail(user.getEmail());
             loginDTO.setRole(user.getRole());
+            loginDTO.setId(user.getId());
 
             return loginDTO;
         }
         throw new UserNotFoundException();
+    }
+
+    @RequestMapping(value="/getCitizenToken/{citizenID}")
+    public ResponseEntity<String> getCitizenToken(@PathVariable("citizenID") String citizenID) throws CitizenNotFoundException {
+
+        Optional<CitizenToken> citizenToken = citizenTokenRepository.findByCitizenId(citizenID);
+        if(!citizenToken.isPresent())
+            throw new CitizenNotFoundException();
+
+        return ResponseEntity.ok(citizenToken.get().getToken());
+
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

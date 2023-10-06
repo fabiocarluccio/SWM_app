@@ -97,4 +97,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                         "Error during email sending"
                 ));
     }
+
+    @ExceptionHandler(CitizenNotFoundException.class)
+    public ResponseEntity<Object> handleSpecificException(CitizenNotFoundException ex) {
+        // Creare un oggetto di risposta personalizzato per l'eccezione specifica
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ExceptionDTO(
+                        15,
+                        CitizenNotFoundException.class.getSimpleName(),
+                        "Citizen not found"
+                ));
+    }
 }
