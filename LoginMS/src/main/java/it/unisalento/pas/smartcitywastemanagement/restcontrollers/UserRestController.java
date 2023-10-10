@@ -346,7 +346,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
      * @throws UserNotFoundException
      */
     @RequestMapping(value="/get_citizen_id/{citizen_token}", method=RequestMethod.GET)
-    public String getCitizenId(@PathVariable String citizen_token) throws UserNotFoundException {
+    public String getCitizenId(@PathVariable String citizen_token) throws CitizenNotFoundException {
         System.out.println("CitizenToken: " + citizen_token);
 
         Optional<CitizenToken> optCitizenToken = citizenTokenRepository.findByToken(citizen_token);
@@ -354,7 +354,7 @@ public class UserRestController { // va a gestire tutto il ciclo CRUD degli uten
         if (optCitizenToken.isPresent()) {
             return optCitizenToken.get().getCitizenId();
         }
-        throw new UserNotFoundException();
+        throw new CitizenNotFoundException();
     }
 
     /*
