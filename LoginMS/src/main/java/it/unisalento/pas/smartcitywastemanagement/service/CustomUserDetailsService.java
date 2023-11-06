@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // TODO - qua si implementa logica che assegna ruoli diversi a seconda del ruolo dell'utente
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getUsername()).password(user.getPassword()).roles("USER").build();
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(user.getUsername()).password(user.getPassword()).roles(user.getRole()).build();
 
         return userDetails;
     }

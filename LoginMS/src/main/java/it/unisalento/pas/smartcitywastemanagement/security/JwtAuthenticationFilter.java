@@ -79,6 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // faccio la validazione per vedere se questo token è valido
                 if (jwtUtilities.validateToken(jwt, userDetails)) {
 
+                    System.out.println(userDetails.getAuthorities());
                     // e poi mi faccio tutta la parte di autenticazione
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());

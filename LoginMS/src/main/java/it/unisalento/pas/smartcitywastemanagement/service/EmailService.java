@@ -20,12 +20,29 @@ public class EmailService {
     @Autowired
     private SimpleMailMessage templateCredentialsMessage;
 
+    @Autowired
+    private SimpleMailMessage templateResetPasswordMessage;
+
     public void sendCredentialsEmail(String recipient, String username, String password) throws MailException {
 
         SimpleMailMessage message = new SimpleMailMessage(templateCredentialsMessage);
 
         // Setting del messaggio da inviare
         String text = String.format(templateCredentialsMessage.getText(), username, password);
+        message.setText(text);
+        message.setTo("carmine.accogli01@gmail.com"); // qua va recipient
+
+        // Invio della mail
+        mailSender.send(message);
+
+    }
+
+    public void sendResetPasswordToken(String recipient, String token) throws MailException {
+
+        SimpleMailMessage message = new SimpleMailMessage(templateResetPasswordMessage);
+
+        // Setting del messaggio da inviare
+        String text = String.format(templateResetPasswordMessage.getText(),token);
         message.setText(text);
         message.setTo("carmine.accogli01@gmail.com"); // qua va recipient
 

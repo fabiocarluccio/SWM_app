@@ -22,8 +22,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(PasswordNotMatchingException.class)
-    public ResponseEntity<Object> handleSpecificException(PasswordNotMatchingException ex) {
-        // Creare un oggetto di risposta personalizzato per l'eccezione specifica
+    public ResponseEntity<Object> passwordNotMachingHandler(PasswordNotMatchingException ex) {
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionDTO(
                         3,
@@ -33,8 +33,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(TokenNotMatchingException.class)
-    public ResponseEntity<Object> handleAnotherException(TokenNotMatchingException ex) {
-        // Creare un oggetto di risposta personalizzato per un'altra eccezione specifica
+    public ResponseEntity<Object> tokenNotMatchingHandler(TokenNotMatchingException ex) {
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ExceptionDTO(
                         2,
@@ -44,9 +44,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleAnotherException(UserNotFoundException ex) {
-        // Creare un oggetto di risposta personalizzato per un'altra eccezione specifica
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<Object> userNotFoundHandler(UserNotFoundException ex) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionDTO(
                         1,
                         UserNotFoundException.class.getSimpleName(),
@@ -55,9 +55,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Object> handleAnotherException(UsernameNotFoundException ex) {
-        // Creare un oggetto di risposta personalizzato per un'altra eccezione specifica
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<Object> usernameNotFoundHandler(UsernameNotFoundException ex) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionDTO(
                         4,
                         UsernameNotFoundException.class.getSimpleName(),
@@ -66,8 +66,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Object> handleAnotherException(AuthenticationException ex) {
-        // Creare un oggetto di risposta personalizzato per un'altra eccezione specifica
+    public ResponseEntity<Object> authenticationExceptionHandler(AuthenticationException ex) {
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ExceptionDTO(
                         5,
@@ -76,20 +76,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGenericException(Exception ex) {
-        // Creare un oggetto di risposta personalizzato per tutte le altre eccezioni
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ExceptionDTO(
-                        0,
-                        Exception.class.getSimpleName(),
-                        "Internal server error"
-                ));
-    }
 
     @ExceptionHandler(MailException.class)
-    public ResponseEntity<Object> handleGenericException(MailException ex) {
-        // Creare un oggetto di risposta personalizzato per tutte le altre eccezioni
+    public ResponseEntity<Object> mailExceptionHandler(MailException ex) {
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ExceptionDTO(
                         6,
@@ -99,11 +89,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(CitizenNotFoundException.class)
-    public ResponseEntity<Object> handleSpecificException(CitizenNotFoundException ex) {
-        // Creare un oggetto di risposta personalizzato per l'eccezione specifica
+    public ResponseEntity<Object> citizenNotFoundHandler(CitizenNotFoundException ex) {
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionDTO(
-                        15,
+                        7,
                         CitizenNotFoundException.class.getSimpleName(),
                         "Citizen not found"
                 ));

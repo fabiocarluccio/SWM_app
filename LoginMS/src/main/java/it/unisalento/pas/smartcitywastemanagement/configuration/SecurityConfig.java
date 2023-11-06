@@ -50,30 +50,16 @@ public class SecurityConfig {
 
         http.cors().and().csrf().disable()
                 .authorizeRequests().
-                requestMatchers("/api/authentication/get_info/*").permitAll().
-                requestMatchers("/api/authentication/getall").permitAll().
                 requestMatchers("/api/authentication/authenticate").permitAll().
-                requestMatchers("/api/authentication/password_update").permitAll().
+                requestMatchers("/api/authentication/registration").permitAll().
                 requestMatchers("/api/authentication/password_reset").permitAll().
                 requestMatchers("/api/authentication/password_reset_token").permitAll().
-                requestMatchers("/api/authentication/registration").permitAll().
                 anyRequest().authenticated().
                 and().
                 exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)).
                 sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
-        /*
-        return http.csrf().disable()
-                .authorizeHttpRequests()
-                .requestMatchers("/api/users/**").authenticated() // necessaria l'autenticazione
-                .and()
-                .authorizeHttpRequests()
-                .requestMatchers("/api/bins/**").permitAll() // non necessaria l'autenticazione
-                .and()
-                .httpBasic(Customizer.withDefaults())
-                .build();
-        */
     }
 
     @Bean
@@ -82,28 +68,4 @@ public class SecurityConfig {
 
     }
 
-
-
-    /*
-    @Bean
-    public UserDetailsService userDetailsService() {
-
-
-
-
-        UserDetails fabio = User.builder() // questo User non e' quello cheabbiamo creato noi. ma e1 una classe
-                .username("fabio")
-                .password(passwordEncoder().encode("12345"))
-                .roles("ADMIN")
-                .build();
-        UserDetails paolo = User.builder()
-                .username("roberto")
-                .password(passwordEncoder().encode("12345"))
-                .roles("USER")
-                .build();
-
-
-        return new InMemoryUserDetailsManager(fabio, paolo);
-
-    }*/
 }

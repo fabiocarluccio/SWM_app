@@ -51,4 +51,22 @@ public class MailConfiguration {
 
         return message;
     }
+
+    @Bean
+    public SimpleMailMessage templateResetPasswordMessage() {
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setText(
+                "Hey you \uD83D\uDC40,\n" +
+                        "Your password change request has been granted. \n"+
+                        "We've generated a special secret token just for you. Here it is:\n"+
+                        "\uD83D\uDD10 Password Change Token: %s \n\n"+
+                        "Create something unique and secure, so no cyber-villains can defeat you\n"+
+                        "And, of course, keep this new password safe!\n\n\n"+
+                        "Trashy high-fives \uD83D\uDD90\uFE0F,\n" +
+                        "The Cleanup Crew");
+        message.setSubject("Lost Your Password? Let's Recycle It!");
+
+        return message;
+    }
 }
