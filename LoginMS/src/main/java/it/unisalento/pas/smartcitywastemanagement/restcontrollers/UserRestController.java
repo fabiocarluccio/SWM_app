@@ -189,7 +189,7 @@ public class UserRestController {
      * @return
      * @throws UserNotFoundException
      */
-    @PreAuthorize("hasRole('ROLE_Citizen')")
+    @PreAuthorize("hasAnyRole('ROLE_Citizen','ROLE_MICROSERVICE-COMMUNICATION')")
     @RequestMapping(value="/get_citizen_id/{citizen_token}", method=RequestMethod.GET)
     public String getCitizenId(@PathVariable String citizen_token) throws CitizenNotFoundException {
 
