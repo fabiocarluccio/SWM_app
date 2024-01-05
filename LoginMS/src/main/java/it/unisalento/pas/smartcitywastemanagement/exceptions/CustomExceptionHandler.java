@@ -28,7 +28,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         3,
                         PasswordNotMatchingException.class.getSimpleName(),
-                        "Password non valida"
+                        "Invalid password"
                 ));
     }
 
@@ -39,7 +39,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         2,
                         TokenNotMatchingException.class.getSimpleName(),
-                        "Token per il reset password non valido"
+                        "Invalid Token reset password"
                 ));
     }
 
@@ -50,7 +50,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         1,
                         UserNotFoundException.class.getSimpleName(),
-                        "Utente non trovato"
+                        "User not found"
                 ));
     }
 
@@ -61,7 +61,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         4,
                         UsernameNotFoundException.class.getSimpleName(),
-                        "Username non trovato"
+                        "Username not found"
                 ));
     }
 
@@ -72,7 +72,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         5,
                         AuthenticationException.class.getSimpleName(),
-                        "Credenziali non valide"
+                        "Invalid credentials"
                 ));
     }
 
@@ -84,7 +84,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         6,
                         MailException.class.getSimpleName(),
-                        "Errore durante l'invio della email"
+                        "Error during mail sending"
                 ));
     }
 
@@ -95,7 +95,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionDTO(
                         7,
                         CitizenNotFoundException.class.getSimpleName(),
-                        "Cittadino non trovato"
+                        "Citizen not found"
                 ));
     }
 
