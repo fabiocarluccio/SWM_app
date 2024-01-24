@@ -36,4 +36,3 @@ out/
 ### VS Code ###
 .vscode/
 
-LoginMS/src/main/java/it/unisalento/pas/smartcitywastemanagement/security/SecurityConstants.java
