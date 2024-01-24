@@ -22,16 +22,16 @@ jobs:
       uses: gradle/gradle-build-action@v2
 
     - name: Set execute permission for gradlew
-      run: chmod +x SWM_app/LoginMS/gradlew
+      run: chmod +x LoginMS/gradlew
 
     - name: Build with Gradle
-      run: SWM_app/LoginMS/gradlew assemble
+      run: LoginMS/gradlew assemble
 
     - name: Archive Artifact
       uses: actions/upload-artifact@v3
       with:
         name: AuthMSBootjar
-        path: SWM_app/LoginMS/build/libs/SmartCityWasteManagement-0.0.1-SNAPSHOT.jar
+        path: LoginMS/build/libs/SmartCityWasteManagement-0.0.1-SNAPSHOT.jar
   
         
   deploy:
