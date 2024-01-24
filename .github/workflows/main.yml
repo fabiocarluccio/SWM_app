@@ -25,13 +25,13 @@ jobs:
       run: chmod +x ./gradlew
 
     - name: Build with Gradle
-      run: ./gradlew assemble
+      run: ./LoginMS/gradlew assemble
 
     - name: Archive Artifact
       uses: actions/upload-artifact@v3
       with:
         name: AuthMSBootjar
-        path: build/libs/SmartCityWasteManagement-0.0.1-SNAPSHOT.jar
+        path: ./LoginMS/build/libs/SmartCityWasteManagement-0.0.1-SNAPSHOT.jar
   
         
   deploy:
