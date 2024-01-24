@@ -22,7 +22,7 @@ jobs:
       uses: gradle/gradle-build-action@v2
 
     - name: Set execute permission for gradlew
-      run: chmod +x ./gradlew
+      run: chmod +x ./LoginMS/gradlew
 
     - name: Build with Gradle
       run: ./LoginMS/gradlew assemble
