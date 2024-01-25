@@ -19,7 +19,7 @@ public class MailConfiguration {
         mailSender.setPort(587);
 
         mailSender.setUsername("wastemanagementapp.info@gmail.com");
-        mailSender.setPassword("njkocgwejsbsczqd");
+        mailSender.setPassword("wqjaeskupnwhdhuq");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
